@@ -64,7 +64,7 @@ public class RandomTest {
 		}
 		long end = System.currentTimeMillis();
 		
-		System.out.println("Max queue size: " + maxSize
+		System.out.println("Max queue size: " + maxSize + "(" + maxSize*100.0/cnt + ")%"
 				+ ", number of tuples: " + cnt
 				+ ", time per tuple (us): " + (end-start)*1000.0/cnt
 				+ ", max mem (mb): " + maxmem/1e6
