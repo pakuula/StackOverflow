@@ -6,8 +6,8 @@ import java.util.TreeSet;
 import traverse_ordered.common.Cursor;
 
 public class RandomTest {
-	public static final int numSets = 5;
-	public static final int setSize = 10;
+	public static final int numSets = 10;
+	public static final int setSize = 5;
 	public static final int step = 1000000;
 	
 	public static double[] mkSet() {
@@ -34,13 +34,17 @@ public class RandomTest {
 		Driver driver = new Driver(sets);
 		long queueSize = 0;
 		int maxSize = 0;
+		long maxmem = 0;
 		long cnt = 0;
+		long m0 = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
 		
+		System.out.println("Initial memory: " + m0);
 		long start = System.currentTimeMillis();
 		for (@SuppressWarnings("unused") Cursor c : driver) {
 			int size = driver.size();
 			if (size > maxSize) {
 				maxSize = size;
+				maxmem = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
 			}
 			queueSize += size;
 			cnt ++;
@@ -51,7 +55,10 @@ public class RandomTest {
 						+ ", max queue size: " + maxSize
 						+ ", average queue size: " + avgSize
 						+ ", number of tuples: " + cnt
-						+ ", time per tuple (us): " + (end-start)/((double)cnt)*1000.0);
+						+ ", time per tuple (us): " + (end-start)*1000.0/cnt
+						+ ", memory footprint " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1e6
+				);
+				
 				queueSize = 0;
 			}
 		}
@@ -59,6 +66,8 @@ public class RandomTest {
 		
 		System.out.println("Max queue size: " + maxSize
 				+ ", number of tuples: " + cnt
-				+ ", time per tuple (us): " + (end-start)/((double)cnt)*1000.0);
+				+ ", time per tuple (us): " + (end-start)*1000.0/cnt
+				+ ", max mem (mb): " + maxmem/1e6
+				);
 	}
 }
