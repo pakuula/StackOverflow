@@ -9,7 +9,7 @@ import traverse_ordered.common.OrderedArraySet;
 
 public class RandomTest {
 	public static final int numSets = 4;
-	public static final int setSize = 50;
+	public static final int setSize = 40;
 	
 	public static OrderedArraySet<BigDecimal> mkSet() {
 		TreeSet<BigDecimal> sorter = new TreeSet<BigDecimal>();
