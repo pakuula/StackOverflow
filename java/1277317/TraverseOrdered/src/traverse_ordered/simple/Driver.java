@@ -29,6 +29,10 @@ public class Driver implements Iterable<Cursor>, Iterator<Cursor> {
 		this.arrays = arrays;
 		edges = new SortedMultiSet<>();
 	}
+	
+	public int size() {
+		return edges.size();
+	}
 
 	/**
 	 * Итератор наборов индексов

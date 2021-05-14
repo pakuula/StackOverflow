@@ -62,6 +62,10 @@ public class SortedMultiSet<T extends Comparable<? super T>> {
 		return lst.isEmpty();
 	}
 	
+	public int size() {
+		return lst.size();
+	}
+
 	// Возвращает первый элемент и удаляет его
 	public T pollFirst() {
 		T result = lst.get(0);
