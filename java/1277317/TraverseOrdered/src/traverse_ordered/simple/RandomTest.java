@@ -102,7 +102,9 @@ public class RandomTest {
 			}
 		}
 		long end = System.currentTimeMillis();
-		dataFile.close();
+		if (saveData) {
+			dataFile.close();
+		}
 		
 		System.out.println("Max queue size: " + maxSize + "(" + maxSize*100.0/cnt + ")%"
 				+ ", number of tuples: " + cnt
@@ -110,10 +112,10 @@ public class RandomTest {
 				+ ", max mem (mb): " + maxmem/1e6
 				);
 		
-		double share = maxSize*100.0/cnt;
-		double predicted = 2/(numSets*Math.sqrt(numSets)*Math.sqrt(Math.PI/6));
-		System.out.println("Max tuples: " + share  
-				+ ", predicted: " + predicted
+		double share = maxSize/(double)cnt;
+		double predicted = 2/(setSize*Math.sqrt(numSets)*Math.sqrt(Math.PI/6));
+		System.out.println("Max tuples: " + share*100 + "%" 
+				+ ", predicted: " + predicted*100 + "%"
 				);
 
 	}
