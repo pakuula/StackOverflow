@@ -17,21 +17,22 @@ public class Driver implements Iterable<Cursor>, Iterator<Cursor> {
 	/**
 	 * Набор упорядоченных множеств
 	 */
-	private OrderedArraySet<BigDecimal>[] arrays;
+	private double[][] arrays;
 	/**
 	 * Фронт следующих вершин графа, упорядоченных по возрастанию суммы
 	 */
-	private SortedMultiSet<Edge> edges;
-	private boolean started = false;
+	// private SortedMultiSet<Edge> edges;
+	private TreeSet<Cursor> queue;
 	
 	@SafeVarargs
-	public Driver(OrderedArraySet<BigDecimal>... arrays) {
+	public Driver(double[]... arrays) {
 		this.arrays = arrays;
-		edges = new SortedMultiSet<>();
+		queue = new TreeSet<Cursor>();
+		queue.add(new Cursor(arrays));
 	}
 	
 	public int size() {
-		return edges.size();
+		return queue.size();
 	}
 
 	/**
@@ -44,7 +45,7 @@ public class Driver implements Iterable<Cursor>, Iterator<Cursor> {
 
 	@Override
 	public boolean hasNext() {
-		return !started || !edges.isEmpty();
+		return !queue.isEmpty();
 	}
 
 	/**
@@ -52,17 +53,9 @@ public class Driver implements Iterable<Cursor>, Iterator<Cursor> {
 	 */
 	@Override
 	public Cursor next() {
-		Cursor result = null;
-		if (!started) {
-			// Самый первый набор индексов - все индексы равны 0
-			result = new Cursor(arrays);
-			started = true;
-		} else {
-			// Берём из фронта перебора набор индексов с минимальной суммой
-			result = edges.pollFirst().end();
-		}
+		Cursor result = queue.pollFirst();
 		// Для извлечённого набора индексов добавляем в фронт всех детей
-		addEdges(result);
+		addKids(result);
 		return result;
 	}
 	
@@ -70,11 +63,11 @@ public class Driver implements Iterable<Cursor>, Iterator<Cursor> {
 	 * Добавление всех дуг, исходящих из заданного набора индексов
 	 * @param c набор индексов
 	 */
-	private void addEdges(Cursor c) {
+	private void addKids(Cursor c) {
 		for (int i = 0; i < arrays.length; i++) {
 			if (!c.isDone(i)) {
-				Edge e = new Edge(c, i);
-				edges.add(e);
+				Cursor kid = c.inc(i);
+				queue.add(kid);
 			}
 		}
 	}

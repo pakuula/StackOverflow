@@ -1,41 +1,52 @@
 package traverse_ordered.common;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
  * Набор индексов для набора упорядоченных множеств
  */
 public class Cursor implements Comparable<Cursor> {
+	public static final double epsilon = 1e-10;
+	public static boolean almostEquals(double d1, double d2) {
+		return Math.abs(d1 - d2) < epsilon;
+	}
+	public static int almostCompare(double d1, double d2) {
+		boolean eq = almostEquals(d1,d2);
+		if (eq) return 0;
+		
+		return Double.compare(d1, d2);
+	}
 	/**
 	 * набор упорядоченных множеств
 	 */
-	private OrderedArraySet<BigDecimal>[] arrays;
+	private double[][] arrays;
 	/**
 	 * набор индексов
 	 */
 	private int[] index;
+	private double _cached_sum = Double.NaN;
 	
-	public Cursor(OrderedArraySet<BigDecimal>[] arrays) {
+	public Cursor(double[][] arrays) {
 		this.arrays = arrays;
 		this.index = new int[arrays.length];
 		Arrays.fill(index, 0);
+		sum();
 	}
 	
-	protected Cursor(OrderedArraySet<BigDecimal>[] arrays, int[] index) {
+	protected Cursor(double[][] arrays, int[] index, double sum) {
 		this.arrays = arrays;
 		this.index = index;
+		_cached_sum = sum;
 	}
 	
 	/**
 	 * Возвращает кортеж значений, соответствующих индексу.
 	 * @return
 	 */
-	public ArrayList<BigDecimal> get() {
-		ArrayList<BigDecimal> result = new ArrayList<BigDecimal>();
+	public double[] get() {
+		double[] result = new double[arrays.length];
 		for (int i = 0; i < index.length; i++) {
-			result.add(arrays[i].get(index[i]));
+			result[i] = arrays[i][index[i]];
 		}
 		return result;
 	}
@@ -44,12 +55,15 @@ public class Cursor implements Comparable<Cursor> {
 	 * Возвращает сумму значений элементов кортежа.
 	 * @return
 	 */
-	public BigDecimal sum() {
-		BigDecimal result = BigDecimal.ZERO;
-		for (int i = 0; i < index.length; i++) {
-			result = result.add(arrays[i].get(index[i]));
+	public double sum() {
+		if (Double.isNaN(_cached_sum)) {
+			double result = 0.0;
+			for (int i = 0; i < index.length; i++) {
+				result += arrays[i][index[i]];
+			}
+			_cached_sum = result;
 		}
-		return result;
+		return _cached_sum;
 	}
 
 	/**
@@ -58,7 +72,7 @@ public class Cursor implements Comparable<Cursor> {
 	 * @return true если индекс для множества n достиг максимума.
 	 */
 	public boolean isDone(int n) {
-		return index[n] >= arrays[n].size() - 1;
+		return index[n] >= arrays[n].length - 1;
 	}
 
 	/**
@@ -72,8 +86,10 @@ public class Cursor implements Comparable<Cursor> {
 			throw new IllegalArgumentException("The set " + n + " is exhausted");
 		}
 		
-		Cursor result = new Cursor(arrays, index.clone());
-		result.index[n] += 1;
+		int[] new_index = index.clone();
+		new_index[n] += 1;
+		double new_sum = _cached_sum - arrays[n][index[n]] + arrays[n][new_index[n]];
+		Cursor result = new Cursor(arrays, new_index, new_sum);
 		
 		return result;
 	}
@@ -106,7 +122,12 @@ public class Cursor implements Comparable<Cursor> {
 	 */
 	@Override
 	public int compareTo(Cursor o) {
-		return Arrays.compare(index, o.index);
+		int sumCmp = almostCompare(sum(), o.sum());
+		if (sumCmp != 0) {
+			return sumCmp;
+		} else {
+			return Arrays.compare(index, o.index);
+		}
 	}
 
 	@Override
