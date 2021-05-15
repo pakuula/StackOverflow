@@ -1,11 +1,8 @@
 package traverse_ordered.simple;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import traverse_ordered.common.Cursor;
-import traverse_ordered.common.OrderedArraySet;
 
 public class Main {
 	public static double[] mkSet(double... elems) {

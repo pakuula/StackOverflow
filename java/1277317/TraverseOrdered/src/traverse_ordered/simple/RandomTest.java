@@ -11,8 +11,8 @@ import java.util.TreeSet;
 import traverse_ordered.common.Cursor;
 
 public class RandomTest {
-	public static final int numSets = 3;
-	public static final int setSize = 3;
+	public static final int numSets = 10;
+	public static final int setSize = 5;
 	public static final int step = 1000000;
 	
 	public static double[] mkSet() {
@@ -66,10 +66,11 @@ public class RandomTest {
 		
 		long start = System.currentTimeMillis();
 		for (Cursor c : driver) {
-			System.out.println(c+":"+c.sum());
+			// System.out.println(c+":"+c.sum());
 			
 			int size = driver.size();
-			out.println(Double.toString(c.sum())+"\t"+size + "\t#" + c);
+			// out.println(Double.toString(c.sum())+"\t"+size + "#" + c);
+			out.println(Double.toString(c.sum())+"\t"+size);
 			if (size > maxSize) {
 				maxSize = size;
 				maxmem = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
