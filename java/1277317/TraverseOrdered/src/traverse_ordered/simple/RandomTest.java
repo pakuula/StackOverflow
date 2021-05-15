@@ -15,6 +15,12 @@ public class RandomTest {
 	public static final int setSize = 5;
 	public static final int step = 1000000;
 	
+	public static final boolean saveData = false;
+	
+	private String fname;
+	private PrintWriter setsFile;
+	private PrintWriter dataFile;
+	
 	public static double[] mkSet() {
 		TreeSet<Double> sorter = new TreeSet<Double>();
 		Random prng = new Random();
@@ -40,6 +46,10 @@ public class RandomTest {
 	}
 	
 	public static void main(String[] args) throws FileNotFoundException {
+		new RandomTest().run(numSets, setSize, saveData);
+	}
+
+	public void run(int numSets, int setSize, boolean saveData) throws FileNotFoundException {
 		double[][] sets = new double[numSets][];
 		for (int i = 0; i < numSets; i++) {
 			sets[i] = mkSet();
@@ -53,24 +63,24 @@ public class RandomTest {
 		
 		System.out.println("Initial memory: " + m0);
 		
-		String fname = ""+System.currentTimeMillis()/1000;
-		PrintWriter setFile = new PrintWriter(fname+".set.txt");
-		for (double[] set : sets) {
-			setFile.println(arrayToString(set));
+		if (saveData) {
+			fname = ""+System.currentTimeMillis()/1000;
+			setsFile = new PrintWriter(fname+".set.txt");
+			for (double[] set : sets) {
+				setsFile.println(arrayToString(set));
+			}
+			setsFile.close();
+			File ofile = new File(fname +".data.txt");
+			System.out.println(ofile.getAbsolutePath());
+			dataFile = new PrintWriter(ofile);
 		}
-		setFile.close();
-		
-		File ofile = new File(fname +".data.txt");
-		System.out.println(ofile.getAbsolutePath());
-		PrintWriter out = new PrintWriter(ofile);
 		
 		long start = System.currentTimeMillis();
 		for (Cursor c : driver) {
-			// System.out.println(c+":"+c.sum());
-			
 			int size = driver.size();
-			// out.println(Double.toString(c.sum())+"\t"+size + "#" + c);
-			out.println(Double.toString(c.sum())+"\t"+size);
+			if (saveData) {
+				dataFile.println(Double.toString(c.sum())+"\t"+size);
+			}
 			if (size > maxSize) {
 				maxSize = size;
 				maxmem = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
@@ -92,12 +102,20 @@ public class RandomTest {
 			}
 		}
 		long end = System.currentTimeMillis();
-		out.close();
+		dataFile.close();
 		
 		System.out.println("Max queue size: " + maxSize + "(" + maxSize*100.0/cnt + ")%"
 				+ ", number of tuples: " + cnt
 				+ ", time per tuple (us): " + (end-start)*1000.0/cnt
 				+ ", max mem (mb): " + maxmem/1e6
 				);
+		
+		double share = maxSize*100.0/cnt;
+		double predicted = 2/(numSets*Math.sqrt(numSets)*Math.sqrt(Math.PI/6));
+		System.out.println("Max tuples: " + share  
+				+ ", predicted: " + predicted
+				);
+
 	}
+	
 }
