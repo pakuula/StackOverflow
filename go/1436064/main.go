@@ -56,23 +56,22 @@ func (dst *InnerArray) UnmarshalJSON(bytes []byte) error {
 	}
 	delim, ok := token.(json.Delim)
 	if !ok {
-		return fmt.Errorf("Not an array: %s", stream)
+		return fmt.Errorf("InnerArray: Not an array: %s", stream)
 	}
 	if delim != '[' {
-		return fmt.Errorf("'[' expected, got: %c", delim)
+		return fmt.Errorf("InnerArray: '[' expected, got: %c", delim)
 	}
 
 	if !dec.More() {
-		return fmt.Errorf("Missing array of titles: %s", string(bytes))
+		return fmt.Errorf("InnerArray: Missing array of titles: %s", string(bytes))
 	}
-
 	err = dec.Decode(&dst.Titles)
 	if err != nil {
 		return err
 	}
 
 	if !dec.More() {
-		return fmt.Errorf("Missing number: %s", string(bytes))
+		return fmt.Errorf("InnerArray: Missing number: %s", string(bytes))
 	}
 	err = dec.Decode(&dst.Number)
 	if err != nil {
@@ -107,14 +106,14 @@ func (dst *OuterArray) UnmarshalJSON(bytes []byte) error {
 	}
 	delim, ok := token.(json.Delim)
 	if !ok {
-		return fmt.Errorf("Not an array: %s", stream)
+		return fmt.Errorf("OuterArray: Not an array: %s", stream)
 	}
 	if delim != '[' {
-		return fmt.Errorf("'[' expected, got: %c", delim)
+		return fmt.Errorf("OuterArray: '[' expected, got: %c", delim)
 	}
 
 	if !dec.More() {
-		return fmt.Errorf("Missing array of number: %s", string(bytes))
+		return fmt.Errorf("OuterArray: Missing number: %s", string(bytes))
 	}
 	err = dec.Decode(&dst.Number)
 	if err != nil {
@@ -122,7 +121,7 @@ func (dst *OuterArray) UnmarshalJSON(bytes []byte) error {
 	}
 
 	if !dec.More() {
-		return fmt.Errorf("Missing data: %s", string(bytes))
+		return fmt.Errorf("OuterArray: Missing data: %s", string(bytes))
 	}
 	err = dec.Decode(&dst.Data)
 	if err != nil {
@@ -155,7 +154,22 @@ func main() {
 
 		var ia2 InnerArray
 		err = json.Unmarshal(zzz, &ia2)
-		fmt.Printf("Decoded inner array: %#v\n", ia2)
+		fmt.Printf("Decoded inner array: from `%s` to %#v\n", string(zzz), ia2)
+		{
+			src := `{"array":[[{"title":"Привет!"},{"title":"123"}]],"number":1000}`
+			err := json.Unmarshal([]byte(src), &ia2)
+			fmt.Printf("Decoded inner array from `%s`: failed %#v\n", string(zzz), err)
+		}
+		{
+			src := `[[[{"title":"Привет!"},{"title":"123"}]]]`
+			err := json.Unmarshal([]byte(src), &ia2)
+			fmt.Printf("Decoded inner array from `%s`: failed %#v\n", string(zzz), err)
+		}
+		{
+			src := `[[[{"title":"Привет!"},{"title":"123"}]], "123"]`
+			err := json.Unmarshal([]byte(src), &ia2)
+			fmt.Printf("Decoded inner array from `%s`: failed %#v\n", string(zzz), err)
+		}
 	}
 	oa := OuterArray{
 		Number: 0,
