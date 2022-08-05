@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"math"
+	"strings"
 )
 
 var msg = `{
@@ -29,44 +29,7 @@ type Title struct {
 	Title string `json:"title"` // Use default json codec
 }
 
-// Restore the object from the object created by the generic `json.Unmarshal`
-func (t *Title) fromUnmarshalled(obj interface{}) error {
-	mapObj, ok := obj.(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("Title: Non a Title object: %#v", obj)
-	}
-	titleFieldObj, ok := mapObj["title"]
-	if !ok {
-		// Missing "title" field
-		t.Title = ""
-	} else {
-		title, ok := titleFieldObj.(string)
-		if !ok {
-			return fmt.Errorf("Title: value for `title` is not a string: %#v", titleFieldObj)
-		}
-		t.Title = title
-	}
-	return nil
-}
-
 type ArrayOfTitles []Title // Use default json codec
-
-// Restore the object from the object created by the generic `json.Unmarshal`
-func (aot *ArrayOfTitles) fromUnmarshalled(obj interface{}) error {
-	array, ok := obj.([]interface{})
-	if !ok {
-		return fmt.Errorf("ArrayOfTitles: not an array: %#v", obj)
-	}
-	res := make(ArrayOfTitles, len(array))
-	for i, obj2 := range array {
-		err := res[i].fromUnmarshalled(obj2)
-		if err != nil {
-			return err
-		}
-	}
-	*aot = res
-	return nil
-}
 
 type InnerArray struct {
 	Titles []ArrayOfTitles
@@ -82,47 +45,40 @@ func (ia InnerArray) MarshalJSON() ([]byte, error) {
 	return json.Marshal(asArray)
 }
 
-// Optional: Implements json.Unmarshaler, used for testing
-// func (dst *InnerArray) UnmarshalJSON(bytes []byte) error {
-// 	var obj interface{}
-// 	err := json.Unmarshal(bytes, &obj)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return dst.fromUnmarshalled(obj)
-// }
-
-// Restore the object from the object created by the generic `json.Unmarshal`
-func (dst *InnerArray) fromUnmarshalled(obj interface{}) error {
-	decodedArray, ok := obj.([]interface{})
+// Implements json.Unmarshaler, used for testing
+func (dst *InnerArray) UnmarshalJSON(bytes []byte) error {
+	stream := string(bytes)
+	dec := json.NewDecoder(strings.NewReader(stream))
+	// read open bracket
+	token, err := dec.Token()
+	if err != nil {
+		return err
+	}
+	delim, ok := token.(json.Delim)
 	if !ok {
-		return fmt.Errorf("Not an array: %#v", obj)
+		return fmt.Errorf("Not an array: %s", stream)
 	}
-	if len(decodedArray) != 2 {
-		return fmt.Errorf("InnerArray: Two elements required, got %d", len(decodedArray))
-	}
-
-	possibleTitles := decodedArray[0]
-	arrayOfTitlesArray, ok := possibleTitles.([]interface{})
-	if !ok {
-		return fmt.Errorf("InnerArray: Not an array of titles array: %v", arrayOfTitlesArray)
-	}
-	dst.Titles = make([]ArrayOfTitles, len(arrayOfTitlesArray))
-	for i, obj := range arrayOfTitlesArray {
-		dst.Titles[i] = ArrayOfTitles{}
-		err := dst.Titles[i].fromUnmarshalled(obj)
-		if err != nil {
-			return err
-		}
+	if delim != '[' {
+		return fmt.Errorf("'[' expected, got: %c", delim)
 	}
 
-	possibleNumber := decodedArray[1]
-	number, ok := possibleNumber.(float64)
-	if !ok {
-		return fmt.Errorf("InnerArray: Not a number: %#v (type %T)", possibleNumber, possibleNumber)
+	if !dec.More() {
+		return fmt.Errorf("Missing array of titles: %s", string(bytes))
 	}
-	dst.Number = int(math.Round(number))
+
+	err = dec.Decode(&dst.Titles)
+	if err != nil {
+		return err
+	}
+
+	if !dec.More() {
+		return fmt.Errorf("Missing number: %s", string(bytes))
+	}
+	err = dec.Decode(&dst.Number)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -140,35 +96,40 @@ func (oa OuterArray) MarshalJSON() ([]byte, error) {
 	return json.Marshal(asArray)
 }
 
-// Implements json.Unmarshaler, used to decode Message.Payload field
+// Implements json.Unmarshaler
 func (dst *OuterArray) UnmarshalJSON(bytes []byte) error {
-	var obj interface{}
-	err := json.Unmarshal(bytes, &obj)
+	stream := string(bytes)
+	dec := json.NewDecoder(strings.NewReader(stream))
+	// read open bracket
+	token, err := dec.Token()
+	if err != nil {
+		return err
+	}
+	delim, ok := token.(json.Delim)
+	if !ok {
+		return fmt.Errorf("Not an array: %s", stream)
+	}
+	if delim != '[' {
+		return fmt.Errorf("'[' expected, got: %c", delim)
+	}
+
+	if !dec.More() {
+		return fmt.Errorf("Missing array of number: %s", string(bytes))
+	}
+	err = dec.Decode(&dst.Number)
 	if err != nil {
 		return err
 	}
 
-	return dst.fromUnmarshalled(obj)
-}
-
-// Restore the object from the object created by the generic `json.Unmarshal`
-func (dst *OuterArray) fromUnmarshalled(obj interface{}) error {
-	decodedArray, ok := obj.([]interface{})
-	if !ok {
-		return fmt.Errorf("Not an array: %#v", obj)
+	if !dec.More() {
+		return fmt.Errorf("Missing data: %s", string(bytes))
 	}
-	if len(decodedArray) != 2 {
-		return fmt.Errorf("OuterArray: Two elements required, got %d", len(decodedArray))
+	err = dec.Decode(&dst.Data)
+	if err != nil {
+		return err
 	}
 
-	possibleNumber := decodedArray[0]
-	number, ok := possibleNumber.(float64)
-	if !ok {
-		return fmt.Errorf("OuterArray: Not a number: %#v (type %T)", possibleNumber, possibleNumber)
-	}
-	dst.Number = int(math.Round(number))
-
-	return dst.Data.fromUnmarshalled(decodedArray[1])
+	return nil
 }
 
 type Message struct {
@@ -186,6 +147,16 @@ func main() {
 		Number: 1000,
 	}
 
+	{
+		zzz, err := json.Marshal(ia)
+		if err != nil {
+			panic(err)
+		}
+
+		var ia2 InnerArray
+		err = json.Unmarshal(zzz, &ia2)
+		fmt.Printf("Decoded inner array: %#v\n", ia2)
+	}
 	oa := OuterArray{
 		Number: 0,
 		Data:   ia,
