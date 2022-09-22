@@ -20,15 +20,12 @@ public class Main {
 		long start = Util.timeInMillis(items.get(0));
 		start = Util.periodStart(start);
 		
-		Average av = new Average(start, 3);
+		Average av = new Average(start, 2);
 		for (Item it : items) {
 			av.add(it);
 		}
 
-		var lst = av.finish();
-		for (Item it : lst) {
-			System.out.println(it.toString());
-		}
+		av.finish();
 		
 		for (Group g : av.groupify()) {
 			System.out.println(g.toString());

@@ -14,35 +14,28 @@ public class Average {
 
 	public Average(long start, int numOfWindows) {
 		items = new LinkedList<Item>();
-		long startPeriod = Util.periodStart(start);
-		long endPeriod = startPeriod + Window.PERIOD;
+		long intervalStart = Util.periodStart(start);
+		long intervalEnd = intervalStart + Window.PERIOD;
 		
 		duration = Window.PERIOD / numOfWindows;
 		windows = new Window[numOfWindows];
 		
 		for (int i = 0; i < numOfWindows; i++) {
-			windows[i] = new Window(startPeriod + duration*i, duration, i+1);
+			windows[i] = new Window(intervalStart + duration*i, duration, i+1);
 		}
-		windows[numOfWindows-1].end = endPeriod;
+		windows[numOfWindows-1].end = intervalEnd;
 	}
 	
-	private Window lastWindow() {
-		return windows[windows.length-1];
-	}
-	
-	private long periodStart() {
+	private long intervalStart() {
 		return windows[0].start;
 	}
 	
-	private long periodEnd() {
-		return lastWindow().end;
+	private long intervalEnd() {
+		return intervalStart() + Window.PERIOD;
 	}
 
-	private boolean isInPeriod(long t) {
-		long periodStart = periodStart();
-		long periodEnd = periodEnd();
-		
-		return (periodStart <= t && t < periodEnd);
+	private boolean isIn(long t) {
+		return (intervalStart() <= t && t < intervalEnd());
 	}
 
 	private void finishPeriod() {
@@ -56,10 +49,10 @@ public class Average {
 
 	public void add(Item it) throws ParseException {
 		long t = Util.timeInMillis(it);
-		while (!isInPeriod(t)) {
+		while (!isIn(t)) {
 			finishPeriod();
 		}
-		int wIdx = (int) ((t - periodStart()) / duration);
+		int wIdx = (int) ((t - intervalStart()) / duration);
 		assert(wIdx < windows.length);
 		windows[wIdx].add(it.getValue());
 	}
