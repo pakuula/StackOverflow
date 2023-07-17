@@ -48,6 +48,19 @@ Writing the combined signature to both.der
 Done
 ```
 
+Скрипт генерирует файл `both.der`. Как убедиться, что в нём есть подписи от обоих подписантов:
+```bash
+openssl asn1parse -in both.der -inform der | grep Signer1
+openssl asn1parse -in both.der -inform der | grep Signer2
+```
+
+Проверка подписи:
+```bash
+openssl smime -verify -inform DER -in both.der -content lorem.md -noverify >/dev/null
+```
+
+# Как это работает
+
 В скрипте функция `parse_signature_as_sigData` парсит DER представление. Поддерживается только один вид контента - тип `SignedData` (OID `1.2.840.113549.1.7.2`).
 ```python
 def parse_signature_as_sigData(fileName):
