@@ -1,0 +1,49 @@
+<!doctype html>
+<!--
+Основано на wasm_exe.html, созданном The Go Authors.
+Файл wasm_exec.html лежит у вас в <GOROOT>/misc/wasm/, 
+где <GOROOT> - каталог, в который установлен дистрибутив Go,
+	печатается командой `go env GOROOT`
+-->
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Пример Go WASM</title>
+</head>
+
+<body>
+	<!-- Скрипт wasm_exec.js лежит в <GOROOT>/misc/wasm/ -->
+	<script src="wasm_exec.js"></script>
+	<!-- поменяйте путь к загружаемому модулю wasm в вызове WebAssembly.instantiateStreaming -->
+	<script>
+		if (!WebAssembly.instantiateStreaming) { 
+			WebAssembly.instantiateStreaming = async (resp, importObject) => {
+				const source = await (await resp).arrayBuffer();
+				return await WebAssembly.instantiate(source, importObject);
+			};
+		}
+
+		const go = new Go();
+		let mod, inst;
+		WebAssembly.instantiateStreaming(fetch("example.wasm"), go.importObject).then((result) => {
+			mod = result.module;
+			inst = result.instance;
+		}).catch((err) => {
+			console.error(err);
+		});
+
+		async function run() {
+			console.clear();
+			await go.run(inst);
+			inst = await WebAssembly.instantiate(mod, go.importObject); // reset instance
+		}
+		// автоматический запуск `func main()` из wasm
+		window.onload = run
+	</script>
+
+	<div id="_target"></div>
+	<button id="_goBtn" disabled>Click Me!</button>
+</body>
+
+</html>
