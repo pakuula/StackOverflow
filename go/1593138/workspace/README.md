@@ -1,0 +1,1 @@
+Файлы к ответу на вопрос [Как настроить кастомный GOPATH?](https://ru.stackoverflow.com/questions/1593138)
