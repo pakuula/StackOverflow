@@ -1,1 +1,5 @@
 java/**/bin/**/*.class
+go/1598560/bench/c_out.txt
+go/1598560/bench/go_out.txt
+go/1598560/volodarsky/c_app
+go/1598560/volodarsky/go_app
