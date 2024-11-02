@@ -9,6 +9,10 @@ char * buf = NULL;
 
 const size_t BSIZE = 64 * 1024;
 
+const int CREATE_FILE     = 0;
+const int OPEN_DEV_FILE   = 1;
+const int USE_STD_STREAM  = 2;
+
 void CleanUp() {
     if (file != NULL) {
         if (file != stdout && file != stderr) {
@@ -22,14 +26,14 @@ void CleanUp() {
 
 int PrepareOut(int variant) {
     switch (variant) {
-        case 0:
+        case CREATE_FILE:
             file = fopen("c_out.txt", "w+b");
             break;
-        case 1:
-            file = fopen("/dev/stderr", "w+b");
+        case OPEN_DEV_FILE:
+            file = fopen("/dev/stdout", "a+b");
             break;
-        case 2:
-            file = stderr;
+        case USE_STD_STREAM:
+            file = stdout;
             break;
     }
     if (file == NULL) {
@@ -41,7 +45,7 @@ int PrepareOut(int variant) {
         return 0;
     }
 
-    if (setvbuf(stdout, buf, _IOFBF, BSIZE) != 0) {
+    if (setvbuf(file, buf, _IOFBF, BSIZE) != 0) {
         CleanUp();
         return 0;
     }
@@ -63,10 +67,11 @@ void Run(int n) {
 */
 import "C"
 
-const (
-	CREATE_FILE     = 0
-	OPEN_DEV_STDERR = 1
-	USE_STDERR      = 2
+var (
+	CreateFile   = int(C.CREATE_FILE)
+	OpenDevFile  = int(C.OPEN_DEV_FILE)
+	UseStdStream = int(C.USE_STD_STREAM)
+	BufSize      = int(C.BSIZE)
 )
 
 func Prepare(variant int) bool {

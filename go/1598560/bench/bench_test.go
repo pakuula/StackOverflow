@@ -8,9 +8,9 @@ import (
 
 const N_LINES = 10000
 
-func BenchmarkGoout(b *testing.B) {
+func BenchmarkGoToFile(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		if !go_out.Prepare() {
+		if !go_out.Prepare(c_out.CreateFile) {
 			b.Fatal("failed to open file")
 		}
 		go_out.Run(N_LINES)
@@ -18,27 +18,47 @@ func BenchmarkGoout(b *testing.B) {
 	}
 }
 
-func BenchmarkCOutFile(b *testing.B) {
+func BenchmarkC_ToFile(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		if !c_out.Prepare(c_out.CREATE_FILE) {
+		if !c_out.Prepare(c_out.CreateFile) {
 			b.Fatal("failed to open file")
 		}
 		c_out.Run(N_LINES)
 		c_out.CleanUp()
 	}
 }
-func BenchmarkCOutDevStderr(b *testing.B) {
+
+func BenchmarkGoToDevFile(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		if !c_out.Prepare(c_out.OPEN_DEV_STDERR) {
+		if !go_out.Prepare(c_out.OpenDevFile) {
+			b.Fatal("failed to open file")
+		}
+		go_out.Run(N_LINES)
+		go_out.CleanUp()
+	}
+}
+func BenchmarkC_ToDevFile(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		if !c_out.Prepare(c_out.OpenDevFile) {
 			b.Fatal("failed to open file")
 		}
 		c_out.Run(N_LINES)
 		c_out.CleanUp()
 	}
 }
-func BenchmarkCOutStderr(b *testing.B) {
+
+func BenchmarkGoToStdStream(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		if !c_out.Prepare(c_out.USE_STDERR) {
+		if !go_out.Prepare(c_out.UseStdStream) {
+			b.Fatal("failed to open file")
+		}
+		go_out.Run(N_LINES)
+		go_out.CleanUp()
+	}
+}
+func BenchmarkC_ToStdStream(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		if !c_out.Prepare(c_out.UseStdStream) {
 			b.Fatal("failed to open file")
 		}
 		c_out.Run(N_LINES)
