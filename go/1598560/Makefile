@@ -4,4 +4,4 @@ run_volodarsky:
 	make -C volodarsky
 
 run_bench:
-	go test -benchmem -bench 'BenchmarkGoout|BenchmarkCOut' ./bench
+	go test -benchmem -bench 'BenchmarkGoout|BenchmarkCOut' -benchtime=20x ./bench
