@@ -10,7 +10,8 @@ void search(char b[], int n, int i) {
         // int fd = fileno(stdout);
         // write(fd, b, strlen(b));
         
-        fputs(b, stdout);
+        // fputs(b, stdout);
+        fwrite(b, 1, n + 1, stdout);
     } else {
         for (char d = '0'; d <= '9'; ++d) {
             b[i] = d;
@@ -23,7 +24,7 @@ int main() {
     if (setvbuf(stdout, NULL, _IOFBF, 64 * 1024) != 0) {
         return 1;
     }
-
+    // flockfile(stdout);
     int n;
     if (scanf("%d", &n) != 1) {
         return 1;

@@ -59,7 +59,8 @@ const char LoremIpsum[] = "Lorem ipsum dolor sit amet, consectetur adipiscing el
 
 void Run(int n) {
     for (int i = 0; i < n; i++) {
-        fputs(LoremIpsum, file);
+        // fputs(LoremIpsum, file);
+        fwrite(LoremIpsum, sizeof(LoremIpsum[0]), sizeof(LoremIpsum)/sizeof(LoremIpsum[0]) - 1, file);
     }
     fflush(file);
 }
