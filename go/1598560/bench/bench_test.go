@@ -18,9 +18,27 @@ func BenchmarkGoout(b *testing.B) {
 	}
 }
 
-func BenchmarkCOut(b *testing.B) {
+func BenchmarkCOutFile(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		if !c_out.Prepare() {
+		if !c_out.Prepare(c_out.CREATE_FILE) {
+			b.Fatal("failed to open file")
+		}
+		c_out.Run(N_LINES)
+		c_out.CleanUp()
+	}
+}
+func BenchmarkCOutDevStderr(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		if !c_out.Prepare(c_out.OPEN_DEV_STDERR) {
+			b.Fatal("failed to open file")
+		}
+		c_out.Run(N_LINES)
+		c_out.CleanUp()
+	}
+}
+func BenchmarkCOutStderr(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		if !c_out.Prepare(c_out.USE_STDERR) {
 			b.Fatal("failed to open file")
 		}
 		c_out.Run(N_LINES)

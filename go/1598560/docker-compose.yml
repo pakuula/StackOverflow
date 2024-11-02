@@ -1,0 +1,7 @@
+services:
+  bench:
+    build: .
+    volumes:
+      - ".:/data"
+    command: make -C /data
+    user: "1000:1000"

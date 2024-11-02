@@ -8,16 +8,17 @@ import (
 var file *os.File
 
 func Prepare() bool {
-	f, err := os.Create("go_out.txt")
-	if err != nil {
-		return false
-	}
-	file = f
+	// f, err := os.Create("go_out.txt")
+	// if err != nil {
+	// 	return false
+	// }
+	// file = f
+	file = os.Stderr
 	return true
 }
 
 func CleanUp() {
-	file.Close()
+	// file.Close()
 }
 
 const LoremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n"
