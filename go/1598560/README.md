@@ -80,7 +80,11 @@ ok      some/bench      3.450s
 
 # Тесты в Alpine
 
-Запуск в контейнере `docker` командой `docker compose up --build --remove-orphans`.
+Запуск в контейнере `docker` командами 
+```
+docker compose build --build-arg UID=`id -u`
+docker compose run --rm bench
+```
 
 Результат запуска в Docker Desktop for Windows на Core i7-1260P.
 ```text
