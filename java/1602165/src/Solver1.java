@@ -91,22 +91,26 @@ public class Solver1 {
      * @throws IndexOutOfBoundsException если start находится вне массива.
      */
     public int matchingEnd(int start) {
-        var end = arr.length;
         if (start < 0 || start >= arr.length) {
             throw new IndexOutOfBoundsException();
         }
-        var numbers = new HashSet<Integer>();
-        for (var i = start; i < arr.length; i++) {
+        var numbers = new HashSet<Integer>(); // Множество уникальных элементов подмассива.
+        numbers.add(start);
+        for (var i = skipSameVal(start) ; i < arr.length; skipSameVal(start)) {
             var v = arr[i];
             if (numbers.contains(v)) {
+                // Этот элемент уже есть в подмассиве
                 continue;
             }
             if (numbers.size() == uniqueCount) {
+                // Подмассив должен содержать не более uniqueCount уникальных элементов.
+                // Добавление текущего элемента приведёт к превышению лимита.
                 return i;
             }
+            // Добавляем текущий элемент в множество уникальных элементов.
             numbers.add(v);
         }
-        return end;
+        return arr.length;
     }
 
     /**
