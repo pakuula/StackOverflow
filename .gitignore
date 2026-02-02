@@ -4,4 +4,4 @@ go/1598560/bench/go_out.txt
 go/1598560/volodarsky/c_app
 go/1598560/volodarsky/go_app
 __pycache__/
-__pycache__/
+java/**/*.class
